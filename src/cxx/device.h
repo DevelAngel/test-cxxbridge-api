@@ -40,7 +40,7 @@ namespace device {
 
       virtual DeviceType type() const noexcept final { return DeviceType::HSM; }
 
-      virtual std::vector<uint8_t> sign() const = 0;
+      virtual std::vector<uint8_t> sign(size_t slot) const = 0;
   };
 
   /// variant one of devices of type A
@@ -50,7 +50,11 @@ namespace device {
       explicit USB_HSM(DeviceOS os);
       virtual ~USB_HSM() {}
 
-      virtual std::vector<uint8_t> sign() const final;
+      virtual std::vector<uint8_t> sign(size_t slot) const final;
+
+    private:
+      bool m_rsa_key_generated_slot_one = false;
+      bool m_rsa_key_generated_slot_two = false;
   };
 
   /// variant two of devices of type A
@@ -60,7 +64,14 @@ namespace device {
       explicit SERVER_HSM(DeviceOS os);
       virtual ~SERVER_HSM() {}
 
-      virtual std::vector<uint8_t> sign() const final;
+      virtual std::vector<uint8_t> sign(size_t slot) const final;
+
+    private:
+      bool m_secp256k1_key_generated_slot_one = false;
+      bool m_secp256k1_key_generated_slot_two = false;
+      bool m_secp256k1_key_generated_slot_three = false;
+      bool m_secp256k1_key_generated_slot_four = false;
+      bool m_secp256k1_key_generated_slot_five = false;
   };
 
   /// devices of type B
