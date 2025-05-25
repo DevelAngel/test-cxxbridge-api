@@ -114,14 +114,14 @@ pub(super) mod intern {
     pub mod ffi {
 
         #[derive(Debug)]
-        enum DeviceOS {
+        pub enum DeviceOS {
             BareMetal,
             Linux,
             WinDoof,
         }
 
         #[derive(Debug)]
-        enum DeviceType {
+        pub enum DeviceType {
             HSM,
             FIDO,
         }

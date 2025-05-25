@@ -11,6 +11,7 @@ namespace cxx::device {
   using Device = ::device::Device;
   using HSM = ::device::HSM;
 
-  auto fetch_device(size_t num) -> std::shared_ptr<Device>;
-  auto fetch_hsm(size_t num) -> std::shared_ptr<HSM>;
+  auto fetch_device(rust::usize num) -> std::shared_ptr<Device>;
+  auto fetch_hsm(rust::usize num) -> std::shared_ptr<HSM>;
+
 }
