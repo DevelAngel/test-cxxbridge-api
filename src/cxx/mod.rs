@@ -44,6 +44,7 @@ impl Device {
             if device.is_null() {
                 Err(Error::msg(format!("HSM device {num} not found")))
             } else {
+                let device = intern::ffi::HSMWrapper { intern: device };
                 Ok(Device {
                     _num: num,
                     dtype: Hsm(device),
@@ -70,9 +71,27 @@ impl<OS> std::ops::Deref for Device<Hsm, OS>
 where
     OS: AnyDeviceOS,
 {
-    type Target = intern::ffi::HSM;
+    type Target = intern::ffi::HSMWrapper;
     fn deref(&self) -> &Self::Target {
         &self.dtype.0
+    }
+}
+
+impl<OS> Device<Hsm, OS>
+where
+    OS: AnyDeviceOS,
+{
+    pub fn sign_slot(&self, slot: usize) -> Result<Vec<u8>> {
+        let sig = self.dtype.0.sign(slot)?;
+        Ok(sig)
+    }
+}
+
+/// make methods like os() and dtype() available for HSMWrapper
+impl std::ops::Deref for intern::ffi::HSMWrapper {
+    type Target = intern::ffi::HSM;
+    fn deref(&self) -> &Self::Target {
+        &self.intern
     }
 }
 
@@ -99,7 +118,7 @@ pub trait DeviceType {}
 pub trait AnyDeviceType: DeviceType {}
 pub struct UnknownDeviceType;
 pub struct AnyDevice(SharedPtr<intern::ffi::Device>);
-pub struct Hsm(SharedPtr<intern::ffi::HSM>);
+pub struct Hsm(intern::ffi::HSMWrapper);
 pub struct Fido;
 impl DeviceType for UnknownDeviceType {}
 impl DeviceType for AnyDevice {}
@@ -126,6 +145,10 @@ pub(super) mod intern {
             FIDO,
         }
 
+        pub struct HSMWrapper {
+            intern: SharedPtr<HSM>,
+        }
+
         unsafe extern "C++" {
             include!("test-cxxbridge-api/src/cxx/mod.h");
 
@@ -146,8 +169,10 @@ pub(super) mod intern {
             fn os(self: &HSM) -> DeviceOS;
             #[cxx_name = "type"]
             fn dtype(self: &HSM) -> DeviceType;
+            //fn sign(self: &HSM, slot: usize) -> CxxVector<u8>; //< error: returning C++ vector by value is not supported
 
-            //fn sign(self: &USB_HSM);
+            // HSMWrapper
+            fn sign(self: &HSMWrapper, slot: usize) -> Result<Vec<u8>>;
         }
     }
 }
