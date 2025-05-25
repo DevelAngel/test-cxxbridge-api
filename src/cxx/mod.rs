@@ -55,6 +55,18 @@ impl Device {
     }
 }
 
+impl<OS> Device<Hsm, OS>
+where
+    OS: AnyDeviceOS,
+{
+    pub fn sign_slot(&self, slot: usize) -> Result<Vec<u8>> {
+        let sig = self.dtype.0.sign(slot)?;
+        Ok(sig)
+    }
+}
+
+// Deref
+
 /// make methods like os() and dtype() available for Device
 impl<OS> std::ops::Deref for Device<AnyDevice, OS>
 where
@@ -74,16 +86,6 @@ where
     type Target = intern::ffi::HSMWrapper;
     fn deref(&self) -> &Self::Target {
         &self.dtype.0
-    }
-}
-
-impl<OS> Device<Hsm, OS>
-where
-    OS: AnyDeviceOS,
-{
-    pub fn sign_slot(&self, slot: usize) -> Result<Vec<u8>> {
-        let sig = self.dtype.0.sign(slot)?;
-        Ok(sig)
     }
 }
 
