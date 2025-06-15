@@ -17,6 +17,7 @@ fn fetch_hsm(num: usize) {
             println!("Fetch HSM device with num {num}:");
             println!("  Device OS: {:?}", device.os());
             println!("  Device Type: {:?}", device.dtype());
+            println!("  Max Slots: {:?}", device.max_slots());
             // rust impl
             match device.sign_slot(1) {
                 Ok(sig) => {

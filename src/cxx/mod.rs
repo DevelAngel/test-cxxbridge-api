@@ -171,6 +171,7 @@ pub(super) mod intern {
             fn os(self: &HSM) -> DeviceOS;
             #[cxx_name = "type"]
             fn dtype(self: &HSM) -> DeviceType;
+            fn max_slots(self: &HSM) -> usize;
             //fn sign(self: &HSM, slot: usize) -> CxxVector<u8>; //< error: returning C++ vector by value is not supported
 
             // HSMWrapper

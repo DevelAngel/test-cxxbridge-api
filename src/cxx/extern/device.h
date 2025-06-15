@@ -17,7 +17,11 @@ namespace device {
     WinDoof,
   };
 
-  /// Common properties of all devices
+  /** Common properties of all devices.
+   *
+   * Each device has an Operating System (OS).
+   * Furthermore, the devices can be distinuished from each other by their type.
+   */
   class Device {
     public:
       Device() = delete;
@@ -31,7 +35,9 @@ namespace device {
       DeviceOS m_os;
   };
 
-  /// devices of type A
+  /**
+   * Devices of type A (HSM).
+   */
   class HSM: public Device {
     public:
       HSM() = delete;
@@ -40,6 +46,16 @@ namespace device {
 
       virtual DeviceType type() const noexcept final { return DeviceType::HSM; }
 
+      /**
+       * Maximum number of slots.
+       */
+      virtual size_t max_slots() const noexcept = 0;
+
+      /**
+       * Each HSM provide a sign method.
+       *
+       * Typically for C++ implementations, the signature is returned by value.
+       */
       virtual std::vector<uint8_t> sign(size_t slot) const = 0;
   };
 
@@ -50,6 +66,7 @@ namespace device {
       explicit USB_HSM(DeviceOS os);
       virtual ~USB_HSM() {}
 
+      virtual size_t max_slots() const noexcept final { return 2; }
       virtual std::vector<uint8_t> sign(size_t slot) const final;
 
     private:
@@ -64,6 +81,7 @@ namespace device {
       explicit SERVER_HSM(DeviceOS os);
       virtual ~SERVER_HSM() {}
 
+      virtual size_t max_slots() const noexcept final { return 5; }
       virtual std::vector<uint8_t> sign(size_t slot) const final;
 
     private:
