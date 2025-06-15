@@ -17,12 +17,22 @@ fn fetch_hsm(num: usize) {
             println!("Fetch HSM device with num {num}:");
             println!("  Device OS: {:?}", device.os());
             println!("  Device Type: {:?}", device.dtype());
+            // rust impl
             match device.sign_slot(1) {
                 Ok(sig) => {
                     println!("  Device Sign: 0x{}", hex::encode(&sig));
                 }
                 Err(error) => {
                     println!("  Warning(sign_slot): {}", error);
+                }
+            }
+            // c++ impl
+            match device.sign(1) {
+                Ok(sig) => {
+                    println!("  Device Sign: 0x{}", hex::encode(&sig));
+                }
+                Err(error) => {
+                    println!("  Warning(sign): {}", error);
                 }
             }
         }
