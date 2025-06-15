@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rust/cxx.h"
-#include "device.h"
+#include "extern/device.h"
 
 namespace cxx::device {
 
