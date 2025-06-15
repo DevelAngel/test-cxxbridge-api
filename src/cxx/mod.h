@@ -10,6 +10,8 @@ namespace cxx::device {
 
   using Device = ::device::Device;
   using HSM = ::device::HSM;
+  using USB_HSM = ::device::USB_HSM;
+  using SERVER_HSM = ::device::SERVER_HSM;
 
   struct HSMWrapper;
 

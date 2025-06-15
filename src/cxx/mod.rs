@@ -89,6 +89,16 @@ where
     }
 }
 
+/// make methods like create_key() available for Hsm
+impl<OS> std::ops::DerefMut for Device<Hsm, OS>
+where
+    OS: AnyDeviceOS,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.dtype.0
+    }
+}
+
 /// make methods like os() and dtype() available for HSMWrapper
 impl std::ops::Deref for intern::ffi::HSMWrapper {
     type Target = intern::ffi::HSM;
@@ -176,6 +186,7 @@ pub(super) mod intern {
 
             // HSMWrapper
             fn sign(self: &HSMWrapper, slot: usize) -> Result<Vec<u8>>;
+            fn create_key(self: &mut HSMWrapper, slot: usize) -> Result<()>;
         }
     }
 }

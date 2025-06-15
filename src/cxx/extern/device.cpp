@@ -5,15 +5,21 @@
 
 namespace device {
 
+  /**
+   * simulate persistent storage of devices
+   * for the livetime of the application
+   */
+  static std::vector<std::shared_ptr<Device>> DEVICES = {
+    std::make_shared<USB_HSM>(DeviceOS::BareMetal),
+    std::make_shared<SERVER_HSM>(DeviceOS::Linux),
+    std::make_shared<SERVER_HSM>(DeviceOS::WinDoof),
+    std::make_shared<FIDO_TWO>(DeviceOS::Linux),
+    std::make_shared<FIDO_ONE>(DeviceOS::WinDoof),
+    std::make_shared<FIDO_ONE>(DeviceOS::BareMetal),
+  };
+
   std::vector<std::shared_ptr<Device>> list_of_devices() {
-    return {
-      std::make_shared<USB_HSM>(DeviceOS::BareMetal),
-      std::make_shared<SERVER_HSM>(DeviceOS::Linux),
-      std::make_shared<SERVER_HSM>(DeviceOS::WinDoof),
-      std::make_shared<FIDO_TWO>(DeviceOS::Linux),
-      std::make_shared<FIDO_ONE>(DeviceOS::WinDoof),
-      std::make_shared<FIDO_ONE>(DeviceOS::BareMetal),
-    };
+    return DEVICES;
   }
 
   Device::Device(DeviceOS os) : m_os(os) {
@@ -105,6 +111,41 @@ namespace device {
         throw std::runtime_error("invalid slot");
     }
     throw std::runtime_error("key not found");
+  }
+
+  void USB_HSM::generate_rsa_key(size_t slot) {
+    switch (slot) {
+      case 1:
+        this->m_rsa_key_generated_slot_one = true;
+        break;
+      case 2:
+        this->m_rsa_key_generated_slot_two = true;
+        break;
+      default:
+        throw std::runtime_error("invalid slot");
+    }
+  }
+
+  void SERVER_HSM::generate_secp256k1_key(size_t slot) {
+    switch (slot) {
+      case 1:
+        this->m_secp256k1_key_generated_slot_one = true;
+        break;
+      case 2:
+        this->m_secp256k1_key_generated_slot_two = true;
+        break;
+      case 3:
+        this->m_secp256k1_key_generated_slot_three = true;
+        break;
+      case 4:
+        this->m_secp256k1_key_generated_slot_four = true;
+        break;
+      case 5:
+        this->m_secp256k1_key_generated_slot_five = true;
+        break;
+      default:
+        throw std::runtime_error("invalid slot");
+    }
   }
 
 } // namespace device

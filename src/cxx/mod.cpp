@@ -32,4 +32,19 @@ namespace cxx::device {
     return convert_vec(sig);
   }
 
+  void HSMWrapper::create_key(rust::usize slot) {
+    assert(this->intern);
+    if (slot > this->intern->max_slots()) {
+      throw std::runtime_error("invalid slot");
+    }
+    if (auto device = std::dynamic_pointer_cast<USB_HSM>(this->intern)) {
+      device->generate_rsa_key(slot);
+      return;
+    } else if (auto device = std::dynamic_pointer_cast<SERVER_HSM>(this->intern)) {
+      device->generate_secp256k1_key(slot);
+      return;
+    }
+    throw std::runtime_error("unsupported device type");
+  }
+
 } // namespace

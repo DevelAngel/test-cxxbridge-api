@@ -68,6 +68,7 @@ namespace device {
 
       virtual size_t max_slots() const noexcept final { return 2; }
       virtual std::vector<uint8_t> sign(size_t slot) const final;
+      virtual void generate_rsa_key(size_t slot) final;
 
     private:
       bool m_rsa_key_generated_slot_one = false;
@@ -83,6 +84,7 @@ namespace device {
 
       virtual size_t max_slots() const noexcept final { return 5; }
       virtual std::vector<uint8_t> sign(size_t slot) const final;
+      virtual void generate_secp256k1_key(size_t slot) final;
 
     private:
       bool m_secp256k1_key_generated_slot_one = false;
