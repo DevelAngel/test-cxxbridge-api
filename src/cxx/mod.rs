@@ -53,6 +53,30 @@ impl Device {
             }
         }
     }
+
+    pub fn fetch_hsm_with<OS: AnyDeviceOS>(num: usize) -> Result<Device<Hsm, OS>> {
+        if num < 1 {
+            Err(Error::msg("num < 1 not allowed"))
+        } else {
+            let device = intern::ffi::fetch_hsm(num - 1)?;
+            if device.is_null() {
+                Err(Error::msg(format!("HSM device {num} not found")))
+            } else if device.os() != OS::OS {
+                Err(Error::msg(format!(
+                    "HSM device {num} has wrong OS: {} instead of {}",
+                    device.os(),
+                    OS::OS
+                )))
+            } else {
+                let device = intern::ffi::HSMWrapper { intern: device };
+                Ok(Device {
+                    _num: num,
+                    dtype: Hsm(device),
+                    _os: PhantomData,
+                })
+            }
+        }
+    }
 }
 
 impl<OS> Device<Hsm, OS>

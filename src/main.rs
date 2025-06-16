@@ -66,6 +66,21 @@ fn fetch_hsm_and_create_key(num: usize) {
     }
 }
 
+fn fetch_linux_hsm(num: usize) {
+    use crate::cxx::Linux;
+
+    match Device::fetch_hsm_with::<Linux>(num) {
+        Ok(device) => {
+            println!("Fetch HSM Linux device with num {num}:");
+            println!("  Device OS: {}", device.os());
+            println!("  Device Type: {}", device.dtype());
+        }
+        Err(error) => {
+            println!("Warning: {}", error);
+        }
+    }
+}
+
 fn main() -> Result<()> {
     println!("Hello, world!");
     println!("--------------------------------");
@@ -83,6 +98,8 @@ fn main() -> Result<()> {
     (1..=3).for_each(fetch_hsm_and_create_key);
     println!("--------------------------------");
     (1..=3).for_each(fetch_hsm);
+    println!("--------------------------------");
+    (1..=3).for_each(fetch_linux_hsm);
     println!("--------------------------------");
 
     println!(".. no errors detected ..");
