@@ -57,7 +57,7 @@ impl Device {
 
 impl<OS> Device<Hsm, OS>
 where
-    OS: AnyDeviceOS,
+    OS: DeviceOS,
 {
     pub fn sign_slot(&self, slot: usize) -> Result<Vec<u8>> {
         let sig = self.dtype.0.sign(slot)?;
@@ -70,7 +70,7 @@ where
 /// make methods like os() and dtype() available for Device
 impl<OS> std::ops::Deref for Device<AnyDevice, OS>
 where
-    OS: AnyDeviceOS,
+    OS: DeviceOS,
 {
     type Target = intern::ffi::Device;
     fn deref(&self) -> &Self::Target {
@@ -81,7 +81,7 @@ where
 /// make methods like os() and dtype() available for Hsm
 impl<OS> std::ops::Deref for Device<Hsm, OS>
 where
-    OS: AnyDeviceOS,
+    OS: DeviceOS,
 {
     type Target = intern::ffi::HSMWrapper;
     fn deref(&self) -> &Self::Target {
@@ -92,7 +92,7 @@ where
 /// make methods like create_key() available for Hsm
 impl<OS> std::ops::DerefMut for Device<Hsm, OS>
 where
-    OS: AnyDeviceOS,
+    OS: DeviceOS,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.dtype.0
@@ -110,7 +110,9 @@ impl std::ops::Deref for intern::ffi::HSMWrapper {
 // states
 
 pub trait DeviceOS {}
-pub trait AnyDeviceOS: DeviceOS {}
+pub trait AnyDeviceOS: DeviceOS {
+    const OS: intern::ffi::DeviceOS;
+}
 pub struct UnknownOS;
 pub struct AnyOS;
 pub struct BareMetal;
@@ -118,13 +120,18 @@ pub struct Linux;
 pub struct WinDoof;
 impl DeviceOS for UnknownOS {}
 impl DeviceOS for AnyOS {}
-impl AnyDeviceOS for AnyOS {}
 impl DeviceOS for BareMetal {}
-impl AnyDeviceOS for BareMetal {}
+impl AnyDeviceOS for BareMetal {
+    const OS: intern::ffi::DeviceOS = intern::ffi::DeviceOS::BareMetal;
+}
 impl DeviceOS for Linux {}
-impl AnyDeviceOS for Linux {}
+impl AnyDeviceOS for Linux {
+    const OS: intern::ffi::DeviceOS = intern::ffi::DeviceOS::Linux;
+}
 impl DeviceOS for WinDoof {}
-impl AnyDeviceOS for WinDoof {}
+impl AnyDeviceOS for WinDoof {
+    const OS: intern::ffi::DeviceOS = intern::ffi::DeviceOS::WinDoof;
+}
 
 pub trait DeviceType {}
 pub trait AnyDeviceType: DeviceType {}
