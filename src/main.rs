@@ -9,6 +9,7 @@ fn fetch_device(num: usize) {
     println!("Fetch device with num {num}:");
     println!("  Device OS: {:?}", device.os());
     println!("  Device Type: {:?}", device.dtype());
+    // println!("  Name: {}", device.name()); // not possible for AnyOS
 }
 
 fn fetch_hsm(num: usize) {
@@ -17,6 +18,7 @@ fn fetch_hsm(num: usize) {
             println!("Fetch HSM device with num {num}:");
             println!("  Device OS: {}", device.os());
             println!("  Device Type: {}", device.dtype());
+            // println!("  Name: {}", device.name()); // not possible for AnyOS
             println!("  Max Slots: {}", device.max_slots());
             for n in 0..=device.max_slots() {
                 // rust impl
@@ -74,6 +76,7 @@ fn fetch_linux_hsm(num: usize) {
             println!("Fetch HSM Linux device with num {num}:");
             println!("  Device OS: {}", device.os());
             println!("  Device Type: {}", device.dtype());
+            println!("  Name: {}", device.name());
         }
         Err(error) => {
             println!("Warning: {}", error);

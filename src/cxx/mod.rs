@@ -89,6 +89,15 @@ where
     }
 }
 
+impl<Type> Device<Type, Linux>
+where
+    Type: DeviceType,
+{
+    pub fn name(&self) -> &'static str {
+        "tux"
+    }
+}
+
 // Deref
 
 /// make methods like os() and dtype() available for Device
