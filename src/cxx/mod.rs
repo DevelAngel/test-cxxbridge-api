@@ -141,6 +141,8 @@ impl DeviceType for Fido {}
 impl AnyDeviceType for Fido {}
 
 pub(super) mod intern {
+    use std::fmt;
+
     #[cxx::bridge(namespace = "cxx::device")]
     pub mod ffi {
 
@@ -187,6 +189,31 @@ pub(super) mod intern {
             // HSMWrapper
             fn sign(self: &HSMWrapper, slot: usize) -> Result<Vec<u8>>;
             fn create_key(self: &mut HSMWrapper, slot: usize) -> Result<()>;
+        }
+    }
+
+    impl fmt::Display for ffi::DeviceType {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                ffi::DeviceType::HSM => write!(f, "HSM"),
+                ffi::DeviceType::FIDO => write!(f, "FIDO"),
+                ffi::DeviceType {
+                    repr: 2_u8..=u8::MAX,
+                } => unreachable!("invalid Device Type"),
+            }
+        }
+    }
+
+    impl fmt::Display for ffi::DeviceOS {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                ffi::DeviceOS::BareMetal => write!(f, "BareMetal"),
+                ffi::DeviceOS::Linux => write!(f, "Linux"),
+                ffi::DeviceOS::WinDoof => write!(f, "WinDoof"),
+                ffi::DeviceOS {
+                    repr: 3_u8..=u8::MAX,
+                } => unreachable!("invalid Device OS"),
+            }
         }
     }
 }
