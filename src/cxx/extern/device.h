@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include <cstdint>
 
 namespace device {
@@ -25,14 +26,16 @@ namespace device {
   class Device {
     public:
       Device() = delete;
-      explicit Device(DeviceOS os);
+      explicit Device(DeviceOS os, std::string name);
       virtual ~Device() {}
 
       virtual DeviceType type() const noexcept = 0;
       virtual DeviceOS os() const noexcept final { return m_os; }
+      virtual std::string const& name() const noexcept final { return m_name; }
 
     private:
       DeviceOS m_os;
+      std::string m_name; // only used by Linux
   };
 
   /**
@@ -41,7 +44,7 @@ namespace device {
   class HSM: public Device {
     public:
       HSM() = delete;
-      explicit HSM(DeviceOS os);
+      explicit HSM(DeviceOS os, std::string name);
       virtual ~HSM() {}
 
       virtual DeviceType type() const noexcept final { return DeviceType::HSM; }
@@ -64,6 +67,7 @@ namespace device {
     public:
       USB_HSM() = delete;
       explicit USB_HSM(DeviceOS os);
+      explicit USB_HSM(DeviceOS os, std::string name);
       virtual ~USB_HSM() {}
 
       virtual size_t max_slots() const noexcept final { return 2; }
@@ -80,6 +84,7 @@ namespace device {
     public:
       SERVER_HSM() = delete;
       explicit SERVER_HSM(DeviceOS os);
+      explicit SERVER_HSM(DeviceOS os, std::string name);
       virtual ~SERVER_HSM() {}
 
       virtual size_t max_slots() const noexcept final { return 5; }
@@ -98,7 +103,7 @@ namespace device {
   class FIDO: public Device {
     public:
       FIDO() = delete;
-      explicit FIDO(DeviceOS os);
+      explicit FIDO(DeviceOS os, std::string name);
       virtual ~FIDO() {}
 
       virtual DeviceType type() const noexcept final { return DeviceType::FIDO; }
@@ -112,6 +117,7 @@ namespace device {
     public:
       FIDO_ONE() = delete;
       explicit FIDO_ONE(DeviceOS os);
+      explicit FIDO_ONE(DeviceOS os, std::string name);
       virtual ~FIDO_ONE() {}
   };
 
@@ -120,6 +126,7 @@ namespace device {
     public:
       FIDO_TWO() = delete;
       explicit FIDO_TWO(DeviceOS os);
+      explicit FIDO_TWO(DeviceOS os, std::string name);
       virtual ~FIDO_TWO() {}
   };
 

@@ -91,10 +91,13 @@ where
 
 impl<Type> Device<Type, Linux>
 where
-    Type: DeviceType,
+    Type: AnyDeviceType,
 {
-    pub fn name(&self) -> &'static str {
-        "tux"
+    pub fn name(&self) -> String {
+        let device = self.dtype.device();
+        let name = device.name();
+        let name = name.to_str().expect("valid name");
+        name.to_owned()
     }
 }
 
@@ -167,18 +170,32 @@ impl AnyDeviceOS for WinDoof {
 }
 
 pub trait DeviceType {}
-pub trait AnyDeviceType: DeviceType {}
+pub trait AnyDeviceType: DeviceType {
+    fn device(&self) -> SharedPtr<intern::ffi::Device>;
+}
 pub struct UnknownDeviceType;
 pub struct AnyDevice(SharedPtr<intern::ffi::Device>);
 pub struct Hsm(intern::ffi::HSMWrapper);
 pub struct Fido;
 impl DeviceType for UnknownDeviceType {}
 impl DeviceType for AnyDevice {}
-impl AnyDeviceType for AnyDevice {}
+impl AnyDeviceType for AnyDevice {
+    fn device(&self) -> SharedPtr<intern::ffi::Device> {
+        self.0.clone()
+    }
+}
 impl DeviceType for Hsm {}
-impl AnyDeviceType for Hsm {}
+impl AnyDeviceType for Hsm {
+    fn device(&self) -> SharedPtr<intern::ffi::Device> {
+        self.0.device()
+    }
+}
 impl DeviceType for Fido {}
-impl AnyDeviceType for Fido {}
+impl AnyDeviceType for Fido {
+    fn device(&self) -> SharedPtr<intern::ffi::Device> {
+        SharedPtr::null()
+    }
+}
 
 pub(super) mod intern {
     use std::fmt;
@@ -218,6 +235,7 @@ pub(super) mod intern {
             fn os(self: &Device) -> DeviceOS;
             #[cxx_name = "type"]
             fn dtype(self: &Device) -> DeviceType;
+            fn name(self: &Device) -> &CxxString;
 
             // HSM
             fn os(self: &HSM) -> DeviceOS;
@@ -227,6 +245,7 @@ pub(super) mod intern {
             //fn sign(self: &HSM, slot: usize) -> CxxVector<u8>; //< error: returning C++ vector by value is not supported
 
             // HSMWrapper
+            fn device(self: &HSMWrapper) -> SharedPtr<Device>;
             fn sign(self: &HSMWrapper, slot: usize) -> Result<Vec<u8>>;
             fn create_key(self: &mut HSMWrapper, slot: usize) -> Result<()>;
         }

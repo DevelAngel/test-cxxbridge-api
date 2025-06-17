@@ -26,6 +26,11 @@ namespace cxx::device {
 
   // HSMWrapper
 
+  auto HSMWrapper::device() const noexcept -> std::shared_ptr<Device> {
+    assert(this->intern);
+    return this->intern;
+  }
+
   auto HSMWrapper::sign(rust::usize slot) const -> rust::Vec<rust::u8> {
     assert(this->intern);
     auto sig = this->intern->sign(slot);

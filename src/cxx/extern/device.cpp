@@ -11,9 +11,9 @@ namespace device {
    */
   static std::vector<std::shared_ptr<Device>> DEVICES = {
     std::make_shared<USB_HSM>(DeviceOS::BareMetal),
-    std::make_shared<SERVER_HSM>(DeviceOS::Linux),
+    std::make_shared<SERVER_HSM>(DeviceOS::Linux, "TUX"),
     std::make_shared<SERVER_HSM>(DeviceOS::WinDoof),
-    std::make_shared<FIDO_TWO>(DeviceOS::Linux),
+    std::make_shared<FIDO_TWO>(DeviceOS::Linux, "Fido the Second"),
     std::make_shared<FIDO_ONE>(DeviceOS::WinDoof),
     std::make_shared<FIDO_ONE>(DeviceOS::BareMetal),
   };
@@ -22,27 +22,38 @@ namespace device {
     return DEVICES;
   }
 
-  Device::Device(DeviceOS os) : m_os(os) {
+  Device::Device(DeviceOS os, std::string name) : m_os(os), m_name(name) {
   }
 
-  HSM::HSM(DeviceOS os) : Device(os) {
+  HSM::HSM(DeviceOS os, std::string name) : Device(os, name) {
   }
 
-  USB_HSM::USB_HSM(DeviceOS os) : HSM(os) {
+  USB_HSM::USB_HSM(DeviceOS os) : HSM(os, "") {
   }
 
-  SERVER_HSM::SERVER_HSM(DeviceOS os) : HSM(os) {
+  USB_HSM::USB_HSM(DeviceOS os, std::string name) : HSM(os, name) {
   }
 
-  FIDO::FIDO(DeviceOS os) : Device(os) {
+  SERVER_HSM::SERVER_HSM(DeviceOS os) : HSM(os, "") {
   }
 
-  FIDO_ONE::FIDO_ONE(DeviceOS os) : FIDO(os) {
+  SERVER_HSM::SERVER_HSM(DeviceOS os, std::string name) : HSM(os, name) {
   }
 
-  FIDO_TWO::FIDO_TWO(DeviceOS os) : FIDO(os) {
+  FIDO::FIDO(DeviceOS os, std::string name) : Device(os, name) {
   }
 
+  FIDO_ONE::FIDO_ONE(DeviceOS os) : FIDO(os, "") {
+  }
+
+  FIDO_ONE::FIDO_ONE(DeviceOS os, std::string name) : FIDO(os, name) {
+  }
+
+  FIDO_TWO::FIDO_TWO(DeviceOS os) : FIDO(os, "") {
+  }
+
+  FIDO_TWO::FIDO_TWO(DeviceOS os, std::string name) : FIDO(os, name) {
+  }
   std::vector<uint8_t> USB_HSM::sign(size_t slot) const {
     switch (slot) {
       case 1:
