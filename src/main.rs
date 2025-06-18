@@ -1,6 +1,7 @@
 use test_cxxbridge::{Device, Linux};
 
 use anyhow::Result;
+use tracing_subscriber::EnvFilter;
 
 fn fetch_device(num: usize) {
     let device = Device::fetch_device(num).expect("device found");
@@ -81,8 +82,13 @@ fn fetch_linux_hsm(num: usize) {
 }
 
 fn main() -> Result<()> {
-    println!("Hello, world!");
-    println!("--------------------------------");
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_writer(std::io::stderr)
+        .compact()
+        .init();
+
+    tracing::info!("Hello, world!");
 
     (1..=6).for_each(fetch_device);
     println!("--------------------------------");

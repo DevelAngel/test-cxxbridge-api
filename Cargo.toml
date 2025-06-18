@@ -16,6 +16,8 @@ anyhow = "1.0.97"
 cxx = "1"
 hex = "0.4.3"
 thiserror = "2.0.12"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
 [build-dependencies]
 cxx-build = "1"
