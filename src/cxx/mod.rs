@@ -233,6 +233,7 @@ pub(super) mod intern {
 
         unsafe extern "C++" {
             include!("test-cxxbridge-api/src/cxx/mod.h");
+            include!("test-cxxbridge-api/src/cxx/mod.except.cpp");
 
             type DeviceOS;
             type DeviceType;
