@@ -1,5 +1,6 @@
 #![allow(dead_code)]
-use anyhow::{Error, Result};
+use crate::error::{Error, Result};
+
 use cxx::SharedPtr;
 
 use std::marker::PhantomData;
@@ -21,11 +22,14 @@ where
 impl Device {
     pub fn fetch_device(num: usize) -> Result<Device<AnyDevice, AnyOS>> {
         if num < 1 {
-            Err(Error::msg("num < 1 not allowed"))
+            Err(Error::InvalidDeviceNum { num })
         } else {
             let device = intern::ffi::fetch_device(num - 1)?;
             if device.is_null() {
-                Err(Error::msg(format!("device {num} not found")))
+                Err(Error::DeviceNotFound {
+                    device_type: "any",
+                    num,
+                })
             } else {
                 Ok(Device {
                     _num: num,
@@ -38,11 +42,14 @@ impl Device {
 
     pub fn fetch_hsm(num: usize) -> Result<Device<Hsm, AnyOS>> {
         if num < 1 {
-            Err(Error::msg("num < 1 not allowed"))
+            Err(Error::InvalidDeviceNum { num })
         } else {
             let device = intern::ffi::fetch_hsm(num - 1)?;
             if device.is_null() {
-                Err(Error::msg(format!("HSM device {num} not found")))
+                Err(Error::DeviceNotFound {
+                    device_type: "HSM",
+                    num,
+                })
             } else {
                 let device = intern::ffi::HSMWrapper { intern: device };
                 Ok(Device {
@@ -56,17 +63,21 @@ impl Device {
 
     pub fn fetch_hsm_with<OS: AnyDeviceOS>(num: usize) -> Result<Device<Hsm, OS>> {
         if num < 1 {
-            Err(Error::msg("num < 1 not allowed"))
+            Err(Error::InvalidDeviceNum { num })
         } else {
             let device = intern::ffi::fetch_hsm(num - 1)?;
             if device.is_null() {
-                Err(Error::msg(format!("HSM device {num} not found")))
+                Err(Error::DeviceNotFound {
+                    device_type: "HSM",
+                    num,
+                })
             } else if device.os() != OS::OS {
-                Err(Error::msg(format!(
-                    "HSM device {num} has wrong OS: {} instead of {}",
-                    device.os(),
-                    OS::OS
-                )))
+                Err(Error::DeviceHasWrongOS {
+                    device_type: "HSM",
+                    num,
+                    actual_os: device.os(),
+                    expected_os: OS::OS,
+                })
             } else {
                 let device = intern::ffi::HSMWrapper { intern: device };
                 Ok(Device {

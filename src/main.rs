@@ -1,8 +1,6 @@
-mod cxx;
+use test_cxxbridge::{Device, Linux};
 
 use anyhow::Result;
-
-use cxx::Device;
 
 fn fetch_device(num: usize) {
     let device = Device::fetch_device(num).expect("device found");
@@ -69,8 +67,6 @@ fn fetch_hsm_and_create_key(num: usize) {
 }
 
 fn fetch_linux_hsm(num: usize) {
-    use crate::cxx::Linux;
-
     match Device::fetch_hsm_with::<Linux>(num) {
         Ok(device) => {
             println!("Fetch HSM Linux device with num {num}:");
@@ -91,7 +87,7 @@ fn main() -> Result<()> {
     (1..=6).for_each(fetch_device);
     println!("--------------------------------");
 
-    // 0 -> Warning: num < 1 not allowed
+    // 0 -> Warning: invalid device number 0
     // 4 -> Warning: HSM device 4 not found
     // 5 -> Warning: HSM device 5 not found
     // 6 -> Warning: HSM device 6 not found

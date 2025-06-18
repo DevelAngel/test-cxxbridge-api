@@ -3,10 +3,19 @@ name = "test-cxxbridge-api"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "test_cxxbridge"
+path = "src/lib.rs"
+
+[[bin]]
+name = "test-cxxbridge"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1.0.97"
 cxx = "1"
 hex = "0.4.3"
+thiserror = "2.0.12"
 
 [build-dependencies]
 cxx-build = "1"
