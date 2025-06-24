@@ -10,6 +10,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/cxx/mod.rs");
     println!("cargo:rerun-if-changed=src/cxx/mod.h");
     println!("cargo:rerun-if-changed=src/cxx/mod.cpp");
+    println!("cargo:rerun-if-changed=src/cxx/mod.except.h");
     println!("cargo:rerun-if-changed=src/cxx/mod.except.cpp");
     println!("cargo:rerun-if-changed=src/cxx/extern/device.h");
     println!("cargo:rerun-if-changed=src/cxx/extern/device.cpp");

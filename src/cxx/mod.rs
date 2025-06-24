@@ -209,11 +209,14 @@ impl AnyDeviceType for Fido {
 }
 
 pub(super) mod intern {
+    use self::ffi_error::ErrorType;
+    use crate::error::Error;
+
     use std::fmt;
+    use std::str::FromStr;
 
     #[cxx::bridge(namespace = "cxx::device")]
     pub mod ffi {
-
         #[derive(Debug)]
         pub enum DeviceOS {
             BareMetal,
@@ -233,7 +236,7 @@ pub(super) mod intern {
 
         unsafe extern "C++" {
             include!("test-cxxbridge-api/src/cxx/mod.h");
-            include!("test-cxxbridge-api/src/cxx/mod.except.cpp");
+            include!("test-cxxbridge-api/src/cxx/mod.except.h");
 
             type DeviceOS;
             type DeviceType;
@@ -284,6 +287,69 @@ pub(super) mod intern {
                 ffi::DeviceOS {
                     repr: 3_u8..=u8::MAX,
                 } => unreachable!("invalid Device OS"),
+            }
+        }
+    }
+
+    /*
+     * ERROR HANDLING
+     */
+
+    #[cxx::bridge(namespace = "rust::behavior")]
+    pub mod ffi_error {
+        pub enum ErrorType {
+            Unknown,
+            Standard,
+            Runtime,
+        }
+
+        extern "Rust" {
+            fn error_to_string(error: &ErrorType) -> &str;
+        }
+    }
+
+    const UNSUPPORTED_ERROR: &str = "UNSUPPORTED";
+    const UNKNOWN_ERROR: &str = "UNKNOWN";
+    const STANDARD_ERROR: &str = "STANDARD";
+    const RUNTIME_ERROR: &str = "RUNTIME";
+
+    fn error_to_string(error: &ErrorType) -> &str {
+        match *error {
+            ErrorType::Unknown => UNKNOWN_ERROR,
+            ErrorType::Standard => STANDARD_ERROR,
+            ErrorType::Runtime => RUNTIME_ERROR,
+            _ => UNSUPPORTED_ERROR,
+        }
+    }
+
+    impl FromStr for ErrorType {
+        type Err = ();
+        fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+            match s {
+                RUNTIME_ERROR => Ok(ErrorType::Runtime),
+                STANDARD_ERROR => Ok(ErrorType::Standard),
+                UNKNOWN_ERROR => Ok(ErrorType::Unknown),
+                UNSUPPORTED_ERROR => Ok(ErrorType::Unknown),
+                _ => Err(()),
+            }
+        }
+    }
+
+    /// retrieve error classes from CXXException.msg()
+    impl From<cxx::Exception> for Error {
+        fn from(src: cxx::Exception) -> Self {
+            use lazy_regex::regex;
+            let re = regex!(r"\[(?<cat>\w+)\]\s*(?<msg>.*)");
+            let (_, [cat, msg]) = re.captures(src.what()).unwrap().extract();
+            let cat = cat.parse::<ErrorType>().unwrap_or(ErrorType::Unknown);
+            let msg = msg.to_owned();
+            match cat {
+                ErrorType::Runtime => Error::CXXRuntime { msg },
+                ErrorType::Standard => Error::CXXException { msg },
+                ErrorType::Unknown => Error::CXXException {
+                    msg: "unknown error".to_owned(),
+                },
+                _ => unreachable!("unhandled error detected"),
             }
         }
     }
