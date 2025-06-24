@@ -14,14 +14,22 @@ namespace cxx::device {
 
   auto fetch_device(rust::usize num) -> std::shared_ptr<Device> {
     auto list = ::device::list_of_devices();
-    auto device = list.at(num);
-    return device;
+    if (num < list.size()) {
+      auto device = list[num];
+      return device;
+    } else {
+      throw std::runtime_error("device not found");
+    }
   }
 
   auto fetch_hsm(rust::usize num) -> std::shared_ptr<HSM> {
     auto list = ::device::list_of_devices();
-    auto device = list.at(num);
-    return std::dynamic_pointer_cast<HSM>(device);
+    if (num < list.size()) {
+      auto device = list[num];
+      return std::dynamic_pointer_cast<HSM>(device);
+    } else {
+      throw std::runtime_error("device not found");
+    }
   }
 
   // HSMWrapper

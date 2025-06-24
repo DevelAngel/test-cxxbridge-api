@@ -1,18 +1,24 @@
-use test_cxxbridge::{Device, Linux};
+use test_cxxbridge::{Device, Error, Linux};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use tracing_subscriber::EnvFilter;
 
 fn fetch_device(num: usize) {
-    let device = Device::fetch_device(num).expect("device found");
-    println!("Fetch device with num {num}:");
-    println!("  Device OS: {:?}", device.os());
-    println!("  Device Type: {:?}", device.dtype());
-    // println!("  Name: {}", device.name()); // not possible for AnyOS
+    match Device::fetch_device(num).context(format!("failed to fetch device with num {num}")) {
+        Ok(device) => {
+            println!("Fetch device with num {num}:");
+            println!("  Device OS: {:?}", device.os());
+            println!("  Device Type: {:?}", device.dtype());
+            // println!("  Name: {}", device.name()); // not possible for AnyOS
+        }
+        Err(error) => {
+            println!("Warning: {error:#}");
+        }
+    }
 }
 
 fn fetch_hsm(num: usize) {
-    match Device::fetch_hsm(num) {
+    match Device::fetch_hsm(num).context(format!("failed to fetch hsm with num {num}")) {
         Ok(device) => {
             println!("Fetch HSM device with num {num}:");
             println!("  Device OS: {}", device.os());
@@ -21,62 +27,75 @@ fn fetch_hsm(num: usize) {
             println!("  Max Slots: {}", device.max_slots());
             for n in 0..=device.max_slots() {
                 // rust impl
-                match device.sign_slot(n) {
+                match device
+                    .sign_slot(n)
+                    .context(format!("failed to sign with slot {n}"))
+                {
                     Ok(sig) => {
-                        println!("  Device Sign(sign_slot): 0x{}", hex::encode(&sig));
+                        println!("  Device Sign(sign_slot): 0x{sig}", sig = hex::encode(&sig));
                     }
                     Err(error) => {
-                        println!("  Warning(sign_slot): {}", error);
+                        println!("  Warning(sign_slot): {error:#}");
                     }
                 }
                 // c++ impl
-                match device.sign(n) {
+                match device
+                    .sign(n)
+                    .map_err(Error::from)
+                    .context(format!("failed to sign with slot {n}"))
+                {
                     Ok(sig) => {
-                        println!("  Device Sign(sign):      0x{}", hex::encode(&sig));
+                        println!("  Device Sign(sign):      0x{sig}", sig = hex::encode(&sig));
                     }
                     Err(error) => {
-                        println!("  Warning(sign): {}", error);
+                        println!("  Warning(sign): {error:#}");
                     }
                 }
             }
         }
         Err(error) => {
-            println!("Warning: {}", error);
+            println!("Warning: {error:#}");
         }
     }
 }
 
 fn fetch_hsm_and_create_key(num: usize) {
-    match Device::fetch_hsm(num) {
+    match Device::fetch_hsm(num).context(format!("failed to fetch hsm with num {num}")) {
         Ok(mut device) => {
             println!("Fetch HSM device with num {num}:");
             for n in 0..=device.max_slots() {
-                match device.create_key(n) {
+                match device
+                    .create_key(n)
+                    .map_err(Error::from)
+                    .context(format!("failed to create key for slot {n}"))
+                {
                     Ok(()) => {
                         println!("  Key created for Slot {n}");
                     }
                     Err(error) => {
-                        println!("  Warning(create_key): {}", error);
+                        println!("  Warning(create_key): {error:#}");
                     }
                 }
             }
         }
         Err(error) => {
-            println!("Warning: {}", error);
+            println!("Warning: {error:#}");
         }
     }
 }
 
 fn fetch_linux_hsm(num: usize) {
-    match Device::fetch_hsm_with::<Linux>(num) {
+    match Device::fetch_hsm_with::<Linux>(num)
+        .context(format!("failed to fetch linux hsm with num {num}"))
+    {
         Ok(device) => {
-            println!("Fetch HSM Linux device with num {num}:");
+            println!("Fetch linux hsm device with num {num}:");
             println!("  Device OS: {}", device.os());
             println!("  Device Type: {}", device.dtype());
             println!("  Name: {}", device.name());
         }
         Err(error) => {
-            println!("Warning: {}", error);
+            println!("Warning: {error:#}");
         }
     }
 }
@@ -90,7 +109,7 @@ fn main() -> Result<()> {
 
     tracing::info!("Hello, world!");
 
-    (1..=6).for_each(fetch_device);
+    (0..=7).for_each(fetch_device);
     println!("--------------------------------");
 
     // 0 -> Warning: invalid device number 0
